@@ -17,4 +17,10 @@ from sklearn.linear_model import LogisticRegression
 logit = LogisticRegression(C = 5, n_jobs = -1)
 logit.fit(X_train, y_train)
 
-print(logit.score(X_test, y_test))
+sentiment = ["This is very bad!"]
+X_sentiment = cv.transform(sentiment)[0]
+result = logit.predict(X_sentiment)
+if (result == 1):
+    print("Bad sentiment")
+else:
+    print("Good sentiment")
