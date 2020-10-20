@@ -5,10 +5,10 @@ class SentimentClassificationModel:
     _cv = CountVectorizer()
     _model = None
 
-    def __init__(self, sentiments, results, c, k):
+    def __init__(self, sentiments, results, c):
         self._cv.fit(sentiments)
         x_train = self._cv.transform(sentiments)
-        self._model = LogisticRegression(c, k)
+        self._model = LogisticRegression(C = c, n_jobs = -1)
         self._model.fit(x_train, results)
 
     def get_score(self, sentiments, results):
