@@ -21,18 +21,7 @@ namespace EightPuzzle
 
         public IReadOnlyCollection<Board> GetNeighbors()
         {
-            (int, int) zeroPosition = (-1, -1);
-
-            for (int i = 0; i < matrix.GetLength(0); i++)
-            {
-                for (int j = 0; j < matrix.GetLength(1); j++)
-                {
-                    if (matrix[i, j] == 0)
-                    {
-                        zeroPosition = (i, j);
-                    }
-                }
-            }
+            (int, int) zeroPosition = GetPosition(matrix, 0);
 
             List<Board> neighbors = new List<Board>();
 
@@ -128,6 +117,22 @@ namespace EightPuzzle
             modifiedMatrix[cell2.Item1, cell2.Item2] = originMatrix[cell1.Item1, cell1.Item2];
 
             return modifiedMatrix;
+        }
+
+        private static (int, int) GetPosition(int[,] matrix, int value)
+        {
+            for (int i = 0; i < matrix.GetLength(0); i++)
+            {
+                for (int j = 0; j < matrix.GetLength(1); j++)
+                {
+                    if (matrix[i, j] == 0)
+                    {
+                        return (i, j);
+                    }
+                }
+            }
+
+            throw new ArgumentException($"{value} is not found in matrix");
         }
     }
 }
