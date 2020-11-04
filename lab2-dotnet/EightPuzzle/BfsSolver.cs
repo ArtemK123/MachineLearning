@@ -2,7 +2,7 @@
 
 namespace EightPuzzle
 {
-    internal class BfsSolver
+    internal class BfsSolver : ISolver
     {
         public State Solve(Board startBoard)
         {

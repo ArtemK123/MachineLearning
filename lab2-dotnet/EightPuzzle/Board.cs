@@ -19,6 +19,10 @@ namespace EightPuzzle
             { 7, 8, 0 }
         });
 
+        public int RowsCount => matrix.GetLength(0);
+
+        public int ColumnsCount => matrix.GetLength(1);
+
         public IReadOnlyCollection<Board> GetNeighbors()
         {
             (int, int) zeroPosition = GetPosition(matrix, 0);
@@ -46,6 +50,11 @@ namespace EightPuzzle
             }
 
             return neighbors;
+        }
+
+        public int GetValue(int i, int j)
+        {
+            return matrix[i, j];
         }
 
         public bool Equals(Board other)
