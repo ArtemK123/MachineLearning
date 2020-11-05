@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace EightPuzzle.AStar
 {
@@ -11,7 +12,7 @@ namespace EightPuzzle.AStar
             stateFactory = new AStarStateFactory(new WrongPlacesHeuristicScoreComputer());
         }
 
-        public State Solve(Board startBoard)
+        public EightPuzzleResult Solve(Board startBoard)
         {
             AStarState startingState = stateFactory.CreateStartingState(startBoard);
 
@@ -22,23 +23,35 @@ namespace EightPuzzle.AStar
             return Solve(queue);
         }
 
-        private AStarState Solve(PriorityQueue<AStarState> queue)
+        private EightPuzzleResult Solve(PriorityQueue<AStarState> queue)
         {
+            HashSet<int> visitedBoardHashes = new HashSet<int>();
+            int visitedNodesCount = 0;
+
             while (true)
             {
                 AStarState state = queue.TakeLast();
+                visitedNodesCount++;
+                Console.WriteLine($"Step: {visitedNodesCount}");
+                Console.WriteLine(state.Board);
 
                 if (state.Board.Equals(Board.FinalBoard))
                 {
-                    return state;
+                    return new EightPuzzleResult(state, visitedNodesCount);
                 }
 
                 IReadOnlyCollection<Board> neighborBoards = state.Board.GetNeighbors();
 
                 foreach (Board board in neighborBoards)
                 {
-                    AStarState newState = stateFactory.Create(board, state);
-                    queue.Add(newState);
+                    int boardHash = board.GetHashCode();
+
+                    if (!visitedBoardHashes.Contains(boardHash))
+                    {
+                        AStarState newState = stateFactory.Create(board, state);
+                        queue.Add(newState);
+                        visitedBoardHashes.Add(boardHash);
+                    }
                 }
             }
         }

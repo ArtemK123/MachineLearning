@@ -4,7 +4,7 @@ namespace EightPuzzle
 {
     internal class BfsSolver : ISolver
     {
-        public State Solve(Board startBoard)
+        public EightPuzzleResult Solve(Board startBoard)
         {
             var queue = new Queue<State>();
             queue.Enqueue(new State(startBoard, null));
@@ -12,17 +12,19 @@ namespace EightPuzzle
             return Solve(queue);
         }
 
-        private State Solve(Queue<State> queue)
+        private EightPuzzleResult Solve(Queue<State> queue)
         {
             HashSet<int> visitedBoardHashes = new HashSet<int>();
+            int visitedNodesCount = 0;
 
             while (true)
             {
                 State state = queue.Dequeue();
+                visitedNodesCount++;
 
                 if (state.Board.Equals(Board.FinalBoard))
                 {
-                    return state;
+                    return new EightPuzzleResult(state, visitedNodesCount);
                 }
 
                 IReadOnlyCollection<Board> neighborBoards = state.Board.GetNeighbors();

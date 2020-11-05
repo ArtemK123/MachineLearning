@@ -2,6 +2,6 @@
 {
     internal interface ISolver
     {
-        public State Solve(Board startBoard);
+        public EightPuzzleResult Solve(Board startBoard);
     }
 }
