@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace EightPuzzle
+namespace EightPuzzle.Bfs
 {
     internal class BfsSolver : ISolver
     {

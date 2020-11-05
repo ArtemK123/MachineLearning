@@ -36,7 +36,6 @@ namespace EightPuzzle.PerformanceCheck
                 }
 
                 Interlocked.Add(ref totalVisitedNodes, result.VisitedNodesCount);
-
             });
 
             return new SolverPerformanceResult(totalVisitedNodes / iterations, totalExecutionMilliseconds / iterations);

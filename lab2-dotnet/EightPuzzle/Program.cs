@@ -1,5 +1,6 @@
 ﻿using System;
 using EightPuzzle.AStar;
+using EightPuzzle.Bfs;
 using EightPuzzle.PerformanceCheck;
 
 namespace EightPuzzle
