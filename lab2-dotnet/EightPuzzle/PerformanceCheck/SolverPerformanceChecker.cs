@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace EightPuzzle.PerformanceCheck
 {
@@ -14,28 +16,30 @@ namespace EightPuzzle.PerformanceCheck
 
         public SolverPerformanceResult Check(ISolver solver, int iterations, int boardRandomisation)
         {
-            Stopwatch stopwatch = new Stopwatch();
             int totalVisitedNodes = 0;
-            long totalExecutionMilliseconds = 0;
+            int totalExecutionMilliseconds = 0;
 
-            for (int i = 0; i < iterations; i++)
+            Parallel.For(0, iterations, _ =>
             {
                 Board board = randomBoardGenerator.Generate(Board.FinalBoard, boardRandomisation);
 
-                stopwatch.Restart();
+                Stopwatch stopwatch = Stopwatch.StartNew();
                 EightPuzzleResult result = solver.Solve(board);
 
-                totalExecutionMilliseconds += stopwatch.ElapsedMilliseconds;
+                stopwatch.Stop();
+
+                Interlocked.Add(ref totalExecutionMilliseconds, (int)stopwatch.ElapsedMilliseconds);
 
                 if (!result.FinalState.Board.Equals(Board.FinalBoard))
                 {
                     throw new Exception("Wrong result of solving during the performance measurements");
                 }
 
-                totalVisitedNodes += result.VisitedNodesCount;
-            }
+                Interlocked.Add(ref totalVisitedNodes, result.VisitedNodesCount);
 
-            return new SolverPerformanceResult(totalVisitedNodes / iterations, (int)totalExecutionMilliseconds / iterations);
+            });
+
+            return new SolverPerformanceResult(totalVisitedNodes / iterations, totalExecutionMilliseconds / iterations);
         }
     }
 }
