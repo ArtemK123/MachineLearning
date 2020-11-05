@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace EightPuzzle.AStar
 {
@@ -32,8 +31,6 @@ namespace EightPuzzle.AStar
             {
                 AStarState state = queue.TakeLast();
                 visitedNodesCount++;
-                Console.WriteLine($"Step: {visitedNodesCount}");
-                Console.WriteLine(state.Board);
 
                 if (state.Board.Equals(Board.FinalBoard))
                 {
