@@ -11,7 +11,7 @@ namespace EightPuzzle
         {
             CheckPerformance(new AStarSolver());
             Console.WriteLine();
-            CheckPerformance(new BfsSolver());
+            CheckPerformance(new AStarWithoutLoopsSolver(), 10, 100);
         }
 
         private static void CheckSolver(ISolver solver, int boardRandomisation = 1000)
@@ -36,6 +36,7 @@ namespace EightPuzzle
             Console.WriteLine($"Iterations: {iterations}");
             Console.WriteLine($"Average visited nodes: {result.AverageVisitedNodesCount}");
             Console.WriteLine($"Average execution milliseconds: {result.AverageExecutionMilliseconds}");
+            Console.WriteLine($"Average path lenght: {result.AveragePathLength}");
         }
     }
 }

@@ -18,6 +18,7 @@ namespace EightPuzzle.PerformanceCheck
         {
             int totalVisitedNodes = 0;
             int totalExecutionMilliseconds = 0;
+            int totalPathLenght = 0;
 
             Parallel.For(0, iterations, _ =>
             {
@@ -36,9 +37,26 @@ namespace EightPuzzle.PerformanceCheck
                 }
 
                 Interlocked.Add(ref totalVisitedNodes, result.VisitedNodesCount);
+                Interlocked.Add(ref totalPathLenght, GetPathLength(result.FinalState));
             });
 
-            return new SolverPerformanceResult(totalVisitedNodes / iterations, totalExecutionMilliseconds / iterations);
+            return new SolverPerformanceResult(
+                totalVisitedNodes / iterations,
+                totalExecutionMilliseconds / iterations,
+                totalPathLenght / iterations);
+        }
+
+        private static int GetPathLength(State state)
+        {
+            int pathLenght = 0;
+            var currentState = state;
+            while (currentState != null)
+            {
+                pathLenght++;
+                currentState = currentState.PreviousState;
+            }
+
+            return pathLenght;
         }
     }
 }
