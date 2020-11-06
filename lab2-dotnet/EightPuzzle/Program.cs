@@ -9,9 +9,13 @@ namespace EightPuzzle
     {
         private static void Main()
         {
+            CheckPerformance(new BfsSolver());
+            Console.WriteLine();
             CheckPerformance(new AStarSolver());
             Console.WriteLine();
             CheckPerformance(new AStarWithoutLoopsSolver(), 10, 100);
+            Console.WriteLine();
+            CheckPerformance(new AStarWithVisitedHashesInsideNodeSolver(), 10, 100);
         }
 
         private static void CheckSolver(ISolver solver, int boardRandomisation = 1000)
