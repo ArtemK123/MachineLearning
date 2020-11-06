@@ -8,10 +8,12 @@ namespace EightPuzzle.PerformanceCheck
     internal class SolverPerformanceChecker
     {
         private readonly RandomBoardGenerator randomBoardGenerator;
+        private readonly PathLengthCalculator pathLengthCalculator;
 
         public SolverPerformanceChecker()
         {
             randomBoardGenerator = new RandomBoardGenerator();
+            pathLengthCalculator = new PathLengthCalculator();
         }
 
         public SolverPerformanceResult Check(ISolver solver, int iterations, int boardRandomisation)
@@ -37,26 +39,13 @@ namespace EightPuzzle.PerformanceCheck
                 }
 
                 Interlocked.Add(ref totalVisitedNodes, result.VisitedNodesCount);
-                Interlocked.Add(ref totalPathLenght, GetPathLength(result.FinalState));
+                Interlocked.Add(ref totalPathLenght, pathLengthCalculator.CalculatePathLenght(result.FinalState));
             });
 
             return new SolverPerformanceResult(
                 totalVisitedNodes / iterations,
                 totalExecutionMilliseconds / iterations,
                 totalPathLenght / iterations);
-        }
-
-        private static int GetPathLength(State state)
-        {
-            int pathLenght = 0;
-            var currentState = state;
-            while (currentState != null)
-            {
-                pathLenght++;
-                currentState = currentState.PreviousState;
-            }
-
-            return pathLenght;
         }
     }
 }
