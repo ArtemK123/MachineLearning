@@ -11,8 +11,8 @@ EPSILON_GREEDY_FACTOR_MAXIMUM = 0.8
 RANDOM_Q_VALUE_MINIMUM = -1
 RANDOM_Q_VALUE_MAXIMUM = 1
 ROUND_DIGITS = 3
-STATE_POSITION_BUCKETS = 150
-STATE_VELOCITY_BUCKETS = 120
+STATE_POSITION_BUCKETS = 20
+STATE_VELOCITY_BUCKETS = 100
 
 actions = [
     0, # move left
@@ -63,7 +63,7 @@ def get_random_action():
 
 def get_state(observation):
     car_position_raw, car_velosity_raw = observation
-    return get_state_from_velocity_and_position(normalize_car_position(car_position_raw), normalize_car_velocity(car_velosity_raw))
+    return get_state_from_velocity_and_position(normalize_car_velocity(car_velosity_raw), normalize_car_position(car_position_raw))
 
 def normalize_car_position(position_raw):
     position_min = env.observation_space.low[0]
@@ -71,7 +71,7 @@ def normalize_car_position(position_raw):
 
     step = (position_max - position_min) / STATE_POSITION_BUCKETS
 
-    return round((position_raw - position_min) / step)
+    return math.floor((position_raw - position_min) / step)
 
 def normalize_car_velocity(velocity_raw):
     velocity_min = env.observation_space.low[1]
@@ -79,7 +79,7 @@ def normalize_car_velocity(velocity_raw):
 
     step = (velocity_max - velocity_min) / STATE_VELOCITY_BUCKETS
 
-    return round((velocity_raw - velocity_min) / step)
+    return math.floor((velocity_raw - velocity_min) / step)
 
 def update_q_value(q_table, state, action, reward, next_state):
     current_value = get_q_value(q_table, state, action)
@@ -103,6 +103,12 @@ def create_q_table():
 def get_state_from_velocity_and_position(velocity, position):
     return velocity * STATE_POSITION_BUCKETS + position
 
+def get_heuristic_reward(observation):
+    car_position_raw, car_velosity_raw = observation
+    if (car_position_raw == 0.5):
+        return 10000
+    return round(abs(car_velosity_raw)*100)
+
 q_table = create_q_table()
 
 epsilon = EPSILON_GREEDY_FACTOR_MAXIMUM
@@ -124,10 +130,10 @@ for i_episode in range(EPISODES_COUNT):
 
         current_state = get_state(observation)
 
-        if done and reward != -1:
-            set_q_value(q_table, previous_state, previous_action, reward)
-        else:
-            update_q_value(q_table, previous_state, previous_action, reward, current_state)
+        heuristic_reward = get_heuristic_reward(observation)
+
+        update_q_value(q_table, previous_state, previous_action, reward + heuristic_reward, current_state)
+
         previous_action = current_action
         previous_state = current_state
         total_reward += reward 
