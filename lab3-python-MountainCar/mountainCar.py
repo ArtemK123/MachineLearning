@@ -108,7 +108,11 @@ def get_heuristic_reward(observation, reward):
     if (reward == 0): # won the game
         return 10000
 
-    return round(abs(car_velosity_raw)*100)
+    close_to_finish_reward = 0
+    if (car_position_raw > 0 and car_velosity_raw > 0):
+        close_to_finish_reward = 3
+
+    return round(abs(car_velosity_raw)*100) + close_to_finish_reward
 
 q_table = create_q_table()
 
