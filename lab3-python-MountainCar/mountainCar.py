@@ -10,9 +10,8 @@ EPSILON_GREEDY_FACTOR_MINIMUM = 0
 EPSILON_GREEDY_FACTOR_MAXIMUM = 0.8
 RANDOM_Q_VALUE_MINIMUM = -1
 RANDOM_Q_VALUE_MAXIMUM = 1
-ROUND_DIGITS = 3
-STATE_POSITION_BUCKETS = 20
-STATE_VELOCITY_BUCKETS = 100
+STATE_POSITION_BUCKETS = 120
+STATE_VELOCITY_BUCKETS = 150
 
 actions = [
     0, # move left
@@ -107,12 +106,19 @@ def get_heuristic_reward(observation):
     car_position_raw, car_velosity_raw = observation
     if (car_position_raw == 0.5):
         return 10000
-    return round(abs(car_velosity_raw)*100)
+
+    right_position_reward = 0
+    if (car_position_raw > 0 and car_velosity_raw > 0):
+        right_position_reward += 3
+
+    return round(abs(car_velosity_raw)*100) + 0
 
 q_table = create_q_table()
 
 epsilon = EPSILON_GREEDY_FACTOR_MAXIMUM
 epsilon_decay = (EPSILON_GREEDY_FACTOR_MAXIMUM - EPSILON_GREEDY_FACTOR_MINIMUM) / EPISODES_COUNT
+
+average_reward_counter = 0
 
 for i_episode in range(EPISODES_COUNT):
     observation = env.reset()
@@ -137,9 +143,12 @@ for i_episode in range(EPISODES_COUNT):
         previous_action = current_action
         previous_state = current_state
         total_reward += reward 
-    
+
+    average_reward_counter += total_reward
+
     if (i_episode % 100 == 0):
-        print(f'Episode number: {i_episode}, TotalReward: {total_reward}')
+        print(f'Episode number: {i_episode}, AverageReward: {average_reward_counter / 100}')
+        average_reward_counter = 0
 
     epsilon -= epsilon_decay
 
