@@ -12,6 +12,7 @@ RANDOM_Q_VALUE_MINIMUM = -1
 RANDOM_Q_VALUE_MAXIMUM = 1
 STATE_POSITION_BUCKETS = 120
 STATE_VELOCITY_BUCKETS = 150
+EVALUATION_EPISODES_COUNT = 50
 
 actions = [
     0, # move left
@@ -34,7 +35,7 @@ def set_q_value(q_table, state, action, value):
     q_values = q_table[state]
     q_values[action] = value
 
-def get_max_q_value(q_table, state):
+def get_max_q_value(q_table, state): # max
     max_q_value = -math.inf
     for action in actions:
         current_q_value = get_q_value(q_table, state, action) 
@@ -47,7 +48,7 @@ def get_next_action(q_table, state, epsilon):
         return get_random_action()
     return get_optimal_action(q_table, state)
 
-def get_optimal_action(q_table, state):
+def get_optimal_action(q_table, state): # argmax
     optimal_action = -1
     optimal_action_q_value = -math.inf
     for action in actions:
@@ -102,10 +103,10 @@ def create_q_table():
 def get_state_from_velocity_and_position(velocity, position):
     return velocity * STATE_POSITION_BUCKETS + position
 
-def get_heuristic_reward(observation):
+def get_heuristic_reward(observation, reward):
     car_position_raw, car_velosity_raw = observation
-    if (car_position_raw == 0.5):
-        return 10000
+    if (reward == 0): # won the game
+        return 20000
 
     return round(abs(car_velosity_raw)*100)
 
@@ -124,7 +125,7 @@ for i_episode in range(EPISODES_COUNT):
     total_reward = 0
 
     while not done:
-        if i_episode > EPISODES_COUNT - 50:
+        if i_episode > EPISODES_COUNT - EVALUATION_EPISODES_COUNT:
             env.render()
 
         current_action = get_next_action(q_table, previous_state, epsilon)
@@ -132,9 +133,9 @@ for i_episode in range(EPISODES_COUNT):
 
         current_state = get_state(observation)
 
-        heuristic_reward = get_heuristic_reward(observation)
+        heuristic_reward = get_heuristic_reward(observation, reward)
 
-        update_q_value(q_table, previous_state, previous_action, reward + heuristic_reward, current_state)
+        update_q_value(q_table, previous_state, previous_action, heuristic_reward, current_state)
 
         previous_action = current_action
         previous_state = current_state
@@ -146,6 +147,9 @@ for i_episode in range(EPISODES_COUNT):
         print(f'Episode number: {i_episode}, AverageReward: {average_reward_counter / 100}, Epsilon: {round(epsilon, 3)}')
         average_reward_counter = 0
 
-    epsilon -= epsilon_decay
+    if i_episode > EPISODES_COUNT - EVALUATION_EPISODES_COUNT:
+        epsilon = 0
+    else:
+        epsilon -= epsilon_decay
 
 env.close()
