@@ -107,11 +107,7 @@ def get_heuristic_reward(observation):
     if (car_position_raw == 0.5):
         return 10000
 
-    right_position_reward = 0
-    if (car_position_raw > 0 and car_velosity_raw > 0):
-        right_position_reward += 3
-
-    return round(abs(car_velosity_raw)*100) + 0
+    return round(abs(car_velosity_raw)*100)
 
 q_table = create_q_table()
 
