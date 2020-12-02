@@ -147,7 +147,7 @@ for i_episode in range(EPISODES_COUNT):
     average_reward_counter += total_reward
 
     if (i_episode % 100 == 0):
-        print(f'Episode number: {i_episode}, AverageReward: {average_reward_counter / 100}')
+        print(f'Episode number: {i_episode}, AverageReward: {average_reward_counter / 100}, Epsilon: {round(epsilon, 3)}')
         average_reward_counter = 0
 
     epsilon -= epsilon_decay
