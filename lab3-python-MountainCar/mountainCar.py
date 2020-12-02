@@ -15,8 +15,8 @@ epsilon_decay = (constants.EPSILON_GREEDY_FACTOR_MAXIMUM - constants.EPSILON_GRE
 average_reward_counter = 0
 
 for i_episode in range(constants.EPISODES_COUNT):
-    observation = env.reset()
-    previous_state = state_space.get_state(observation, env)
+    previous_observation = env.reset()
+    previous_state = state_space.get_state(previous_observation, env)
     previous_action = 1
     done = False
     total_reward = 0
@@ -30,10 +30,11 @@ for i_episode in range(constants.EPISODES_COUNT):
 
         current_state = state_space.get_state(observation, env)
 
-        heuristic_reward = heuristic_reward_module.get_reward(observation, reward)
+        heuristic_reward = heuristic_reward_module.get_reward(observation, previous_observation, reward)
 
         q_learning_algorithms.update_q_value(q_table, previous_state, previous_action, heuristic_reward, current_state)
 
+        previous_observation = observation
         previous_action = current_action
         previous_state = current_state
         total_reward += reward 

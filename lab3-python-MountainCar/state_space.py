@@ -3,9 +3,14 @@ import constants
 
 def get_state(observation, env):
     car_position_raw, car_velosity_raw = observation
-    return _compose_state(_normalize_car_position(car_position_raw, env), _normalize_car_velocity(car_velosity_raw, env))
+    return compose_state(_normalize_car_position(car_position_raw, env), _normalize_car_velocity(car_velosity_raw, env))
 
-def _compose_state(position, velocity):
+def decompose_state(state):
+    car_position = state % constants.STATE_POSITION_BUCKETS
+    car_velocity = state / constants.STATE_POSITION_BUCKETS
+    return (car_position, car_velocity)
+
+def compose_state(position, velocity):
     return velocity * constants.STATE_POSITION_BUCKETS + position
 
 def _normalize_car_position(position_raw, env):
