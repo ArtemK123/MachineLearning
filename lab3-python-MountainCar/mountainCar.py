@@ -20,12 +20,15 @@ actions = [
     2, # move right
 ]
 
-def generate_random_q_values():
-    q_values = []
-    for _ in range(len(actions)):
-        q_values.append(random.randint(RANDOM_Q_VALUE_MINIMUM, RANDOM_Q_VALUE_MAXIMUM))
+def create_q_table():
+    new_q_table = {}
+    
+    for velocity in range(STATE_VELOCITY_BUCKETS):
+        for position in range(STATE_POSITION_BUCKETS):
+            state = compose_state(position, velocity)
+            new_q_table[state] = generate_random_q_values()
 
-    return q_values
+    return new_q_table
 
 def get_q_value(q_table, state, action):
     q_values = q_table[state]
@@ -43,11 +46,6 @@ def get_max_q_value(q_table, state): # max
             max_q_value = current_q_value
     return max_q_value
 
-def get_next_action(q_table, state, epsilon):
-    if random.random() < epsilon:
-        return get_random_action()
-    return get_optimal_action(q_table, state)
-
 def get_optimal_action(q_table, state): # argmax
     optimal_action = -1
     optimal_action_q_value = -math.inf
@@ -58,12 +56,33 @@ def get_optimal_action(q_table, state): # argmax
             optimal_action_q_value = q_value
     return optimal_action
 
+def update_q_value(q_table, state, action, reward, next_state):
+    current_value = get_q_value(q_table, state, action)
+    new_value = current_value +\
+                                LEARNING_FACTOR * (
+                                    reward
+                                    + DISCOUNT_FACTOR * get_max_q_value(q_table, next_state)
+                                    - current_value)
+    set_q_value(q_table, state, action, new_value)
+
+def generate_random_q_values():
+    q_values = []
+    for _ in range(len(actions)):
+        q_values.append(random.randint(RANDOM_Q_VALUE_MINIMUM, RANDOM_Q_VALUE_MAXIMUM))
+
+    return q_values
+
+def get_next_action(q_table, state, epsilon):
+    if random.random() < epsilon:
+        return get_random_action()
+    return get_optimal_action(q_table, state)
+
 def get_random_action():
     return random.randint(0, len(actions) - 1)
 
 def get_state(observation):
     car_position_raw, car_velosity_raw = observation
-    return get_state_from_velocity_and_position(normalize_car_velocity(car_velosity_raw), normalize_car_position(car_position_raw))
+    return compose_state(normalize_car_position(car_position_raw), normalize_car_velocity(car_velosity_raw))
 
 def normalize_car_position(position_raw):
     position_min = env.observation_space.low[0]
@@ -81,32 +100,13 @@ def normalize_car_velocity(velocity_raw):
 
     return math.floor((velocity_raw - velocity_min) / step)
 
-def update_q_value(q_table, state, action, reward, next_state):
-    current_value = get_q_value(q_table, state, action)
-    new_value = current_value +\
-                                LEARNING_FACTOR * (
-                                    reward
-                                    + DISCOUNT_FACTOR * get_max_q_value(q_table, next_state)
-                                    - current_value)
-    set_q_value(q_table, state, action, new_value)
-
-def create_q_table():
-    new_q_table = {}
-    
-    for velocity in range(STATE_VELOCITY_BUCKETS):
-        for position in range(STATE_POSITION_BUCKETS):
-            state = get_state_from_velocity_and_position(velocity, position)
-            new_q_table[state] = generate_random_q_values()
-
-    return new_q_table
-
-def get_state_from_velocity_and_position(velocity, position):
+def compose_state(position, velocity):
     return velocity * STATE_POSITION_BUCKETS + position
 
 def get_heuristic_reward(observation, reward):
     car_position_raw, car_velosity_raw = observation
     if (reward == 0): # won the game
-        return 20000
+        return 10000
 
     return round(abs(car_velosity_raw)*100)
 
