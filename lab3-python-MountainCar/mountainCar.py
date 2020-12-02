@@ -1,23 +1,11 @@
 import gym
-import math
-import random
 import constants
 import state_space
 import q_table as q_table_module
 import q_learning_algorithms
+import heuristic_reward as heuristic_reward_module
 
 env = gym.make('MountainCar-v0') # https://github.com/openai/gym/blob/master/gym/envs/classic_control/mountain_car.py
-
-def get_heuristic_reward(observation, reward):
-    car_position_raw, car_velosity_raw = observation
-    if (reward == 0): # won the game
-        return 10000
-
-    close_to_finish_reward = 0
-    if (car_position_raw > 0 and car_velosity_raw > 0):
-        close_to_finish_reward = 3
-
-    return round(abs(car_velosity_raw)*100) + close_to_finish_reward
 
 q_table = q_table_module.create_q_table()
 
@@ -42,7 +30,7 @@ for i_episode in range(constants.EPISODES_COUNT):
 
         current_state = state_space.get_state(observation, env)
 
-        heuristic_reward = get_heuristic_reward(observation, reward)
+        heuristic_reward = heuristic_reward_module.get_reward(observation, reward)
 
         q_learning_algorithms.update_q_value(q_table, previous_state, previous_action, heuristic_reward, current_state)
 
