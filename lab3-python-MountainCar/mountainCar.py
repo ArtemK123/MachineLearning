@@ -2,31 +2,15 @@ import gym
 import math
 import random
 import constants
+import state_space
+import q_table as q_table_module
 
 env = gym.make('MountainCar-v0') # https://github.com/openai/gym/blob/master/gym/envs/classic_control/mountain_car.py
-
-def create_q_table():
-    new_q_table = {}
-    
-    for velocity in range(constants.STATE_VELOCITY_BUCKETS):
-        for position in range(constants.STATE_POSITION_BUCKETS):
-            state = compose_state(position, velocity)
-            new_q_table[state] = generate_random_q_values()
-
-    return new_q_table
-
-def get_q_value(q_table, state, action):
-    q_values = q_table[state]
-    return q_values[action]
-
-def set_q_value(q_table, state, action, value):
-    q_values = q_table[state]
-    q_values[action] = value
 
 def get_max_q_value(q_table, state): # max
     max_q_value = -math.inf
     for action in constants.ACTIONS:
-        current_q_value = get_q_value(q_table, state, action) 
+        current_q_value = q_table_module.get_q_value(q_table, state, action) 
         if (current_q_value > max_q_value):
             max_q_value = current_q_value
     return max_q_value
@@ -35,27 +19,11 @@ def get_optimal_action(q_table, state): # argmax
     optimal_action = -1
     optimal_action_q_value = -math.inf
     for action in constants.ACTIONS:
-        q_value = get_q_value(q_table, state, action)
+        q_value = q_table_module.get_q_value(q_table, state, action)
         if (q_value > optimal_action_q_value):
             optimal_action = action
             optimal_action_q_value = q_value
     return optimal_action
-
-def update_q_value(q_table, state, action, reward, next_state):
-    current_value = get_q_value(q_table, state, action)
-    new_value = current_value +\
-                                constants.LEARNING_FACTOR * (
-                                    reward
-                                    + constants.DISCOUNT_FACTOR * get_max_q_value(q_table, next_state)
-                                    - current_value)
-    set_q_value(q_table, state, action, new_value)
-
-def generate_random_q_values():
-    q_values = []
-    for _ in range(len(constants.ACTIONS)):
-        q_values.append(random.randint(constants.RANDOM_Q_VALUE_MINIMUM, constants.RANDOM_Q_VALUE_MAXIMUM))
-
-    return q_values
 
 def get_next_action(q_table, state, epsilon):
     if random.random() < epsilon:
@@ -65,28 +33,14 @@ def get_next_action(q_table, state, epsilon):
 def get_random_action():
     return random.randint(0, len(constants.ACTIONS) - 1)
 
-def get_state(observation):
-    car_position_raw, car_velosity_raw = observation
-    return compose_state(normalize_car_position(car_position_raw), normalize_car_velocity(car_velosity_raw))
-
-def normalize_car_position(position_raw):
-    position_min = env.observation_space.low[0]
-    position_max = env.observation_space.high[0]
-
-    step = (position_max - position_min) / constants.STATE_POSITION_BUCKETS
-
-    return math.floor((position_raw - position_min) / step)
-
-def normalize_car_velocity(velocity_raw):
-    velocity_min = env.observation_space.low[1]
-    velocity_max = env.observation_space.high[1]
-
-    step = (velocity_max - velocity_min) / constants.STATE_VELOCITY_BUCKETS
-
-    return math.floor((velocity_raw - velocity_min) / step)
-
-def compose_state(position, velocity):
-    return velocity * constants.STATE_POSITION_BUCKETS + position
+def update_q_value(q_table, state, action, reward, next_state):
+    current_value = q_table_module.get_q_value(q_table, state, action)
+    new_value = current_value +\
+                                constants.LEARNING_FACTOR * (
+                                    reward
+                                    + constants.DISCOUNT_FACTOR * get_max_q_value(q_table, next_state,)
+                                    - current_value)
+    q_table_module.set_q_value(q_table, state, action, new_value)
 
 def get_heuristic_reward(observation, reward):
     car_position_raw, car_velosity_raw = observation
@@ -99,7 +53,7 @@ def get_heuristic_reward(observation, reward):
 
     return round(abs(car_velosity_raw)*100) + close_to_finish_reward
 
-q_table = create_q_table()
+q_table = q_table_module.create_q_table()
 
 epsilon = constants.EPSILON_GREEDY_FACTOR_MAXIMUM
 epsilon_decay = (constants.EPSILON_GREEDY_FACTOR_MAXIMUM - constants.EPSILON_GREEDY_FACTOR_MINIMUM) / constants.EPISODES_COUNT
@@ -108,7 +62,7 @@ average_reward_counter = 0
 
 for i_episode in range(constants.EPISODES_COUNT):
     observation = env.reset()
-    previous_state = get_state(observation)
+    previous_state = state_space.get_state(observation, env)
     previous_action = 1
     done = False
     total_reward = 0
@@ -120,7 +74,7 @@ for i_episode in range(constants.EPISODES_COUNT):
         current_action = get_next_action(q_table, previous_state, epsilon)
         observation, reward, done, info = env.step(current_action)
 
-        current_state = get_state(observation)
+        current_state = state_space.get_state(observation, env)
 
         heuristic_reward = get_heuristic_reward(observation, reward)
 
