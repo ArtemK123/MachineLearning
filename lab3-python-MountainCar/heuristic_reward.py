@@ -10,11 +10,10 @@ def get_reward(observation, previous_observation, reward):
 
     velocity_reward = round(abs(velocity_raw)*100)
 
-    return velocity_reward
-    # if (position_raw < -0.10 or position_raw > 0.2):
-    #     if (velocity_raw > prev_velocity_raw):
-    #         return velocity_reward + 3
-    #     else:
-    #         return velocity_reward - 1
-    # else:
-    #     return velocity_reward
+    if (position_raw < -0.10 or position_raw > 0.2):
+        if (position_raw > prev_position_raw):
+            return velocity_reward + 5
+        else:
+            return velocity_reward - 1
+    else:
+        return velocity_reward
