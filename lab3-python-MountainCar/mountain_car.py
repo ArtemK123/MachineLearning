@@ -40,7 +40,7 @@ for i_episode in range(constants.EPISODES_COUNT):
 
     average_reward_counter += total_reward
 
-    if (i_episode % 100 == 0):
+    if (i_episode % 50 == 0):
         print(f'Episode number: {i_episode}, AverageReward: {average_reward_counter / 100}, Epsilon: {round(epsilon, 3)}')
         average_reward_counter = 0
 
