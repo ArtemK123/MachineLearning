@@ -168,7 +168,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
       if agent == state.getNumAgents():
         return get_agent_score(self.pacman_agent, state, depth - 1)
       if state.isWin() or state.isLose() or depth == 0:
-        return (-1, state.getScore())
+        return (-1, self.evaluationFunction(state))
 
       best_action = -1
       if agent == self.pacman_agent:
@@ -212,7 +212,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
       if agent == state.getNumAgents():
         return get_agent_score(self.pacman_agent, state, alpha, beta, depth - 1)
       if state.isWin() or state.isLose() or depth == 0:
-        return (-1, state.getScore())
+        return (-1, self.evaluationFunction(state))
 
       best_action = -1
       if agent == self.pacman_agent:
@@ -260,7 +260,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
       if agent == state.getNumAgents():
         return get_agent_score(self.pacman_agent, state, depth - 1)
       if state.isWin() or state.isLose() or depth == 0:
-        return (-1, state.getScore())
+        return (-1, self.evaluationFunction(state))
 
       best_action = -1
       if agent == self.pacman_agent:
@@ -291,7 +291,7 @@ def betterEvaluationFunction(currentGameState: GameState) -> float:
   """
 
   # BEGIN_YOUR_CODE (our solution is 13 lines of code, but don't worry if you deviate from this)
-  raise Exception("Not implemented yet")
+  raise Exception("Not implemented")
   # END_YOUR_CODE
 
 # Abbreviation
