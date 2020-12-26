@@ -121,6 +121,7 @@ class MultiAgentSearchAgent(Agent):
     self.index = 0 # Pacman is always agent index 0
     self.evaluationFunction = util.lookup(evalFn, globals())
     self.depth = int(depth)
+    self.pacman_agent = 0
 
 ######################################################################################
 # Problem 1b: implementing minimax
@@ -162,17 +163,15 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
     """
 
-    # BEGIN_YOUR_CODE (our solution is 20 lines of code, but don't worry if you deviate from this)
-    PACMAN_AGENT = 0
-    
+    # BEGIN_YOUR_CODE (our solution is 20 lines of code, but don't worry if you deviate from this)    
     def get_agent_score(agent, state, depth):
       if agent == state.getNumAgents():
-        return get_agent_score(PACMAN_AGENT, state, depth - 1)
+        return get_agent_score(self.pacman_agent, state, depth - 1)
       if state.isWin() or state.isLose() or depth == 0:
         return (-1, state.getScore())
 
       best_action = -1
-      if agent == PACMAN_AGENT:
+      if agent == self.pacman_agent:
         max_score = float("-inf")
         for action in state.getLegalActions(agent):
           score = get_agent_score(agent + 1, state.generateSuccessor(agent, action), depth)[1]
@@ -189,7 +188,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
             best_action = action
         return (best_action, min_score)
 
-    return get_agent_score(PACMAN_AGENT, gameState, self.depth)[0]
+    return get_agent_score(self.pacman_agent, gameState, self.depth)[0]
 
     # END_YOUR_CODE
 
@@ -209,7 +208,35 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
     """
 
     # BEGIN_YOUR_CODE (our solution is 36 lines of code, but don't worry if you deviate from this)
-    raise Exception("Not implemented yet")
+    def get_agent_score(agent, state, alpha, beta, depth):
+      if agent == state.getNumAgents():
+        return get_agent_score(self.pacman_agent, state, alpha, beta, depth - 1)
+      if state.isWin() or state.isLose() or depth == 0:
+        return (-1, state.getScore())
+
+      best_action = -1
+      if agent == self.pacman_agent:
+        max_score = alpha
+        for action in state.getLegalActions(agent):
+          score = get_agent_score(agent + 1, state.generateSuccessor(agent, action), max_score, beta, depth)[1]
+          if score > max_score:
+            max_score = score
+            best_action = action
+            if max_score >= beta:
+              return (best_action, max_score)
+        return (best_action, max_score)
+      else:
+        min_score = beta
+        for action in state.getLegalActions(agent):
+          score = get_agent_score(agent + 1, state.generateSuccessor(agent, action), alpha, min_score, depth)[1]
+          if score < min_score:
+            min_score = score
+            best_action = action
+            if min_score <= alpha:
+              return (best_action, min_score)
+        return (best_action, min_score)
+
+    return get_agent_score(self.pacman_agent, gameState, float("-inf"), float("inf"), self.depth)[0]
     # END_YOUR_CODE
 
 ######################################################################################
