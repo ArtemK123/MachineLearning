@@ -166,40 +166,30 @@ class MinimaxAgent(MultiAgentSearchAgent):
     PACMAN_AGENT = 0
     
     def get_agent_score(agent, state, depth):
-      if agent == PACMAN_AGENT:
-        return get_pacman_best_score(state, depth - 1)
-      if state.isLose() or state.isWin():
-        return state.getScore()
-      min_score = float("inf")
-      next_agent = agent - 1
-      actions = state.getLegalActions(next_agent)
-      for action in actions:
-        score = get_agent_score(next_agent, state.generateSuccessor(next_agent, action), depth)
-        if score < min_score:
-          min_score = score
-      return min_score
+      if agent == state.getNumAgents():
+        return get_agent_score(PACMAN_AGENT, state, depth - 1)
+      if state.isWin() or state.isLose() or depth == 0:
+        return (-1, state.getScore())
 
-    def get_pacman_best_score(state, depth):
-      if (state.isWin() or state.isLose() or depth == 0):
-        return state.getScore()
-      best_score = float("-inf")
-      last_agent = state.getNumAgents() - 1
-      actions = state.getLegalActions(last_agent)
-      for action in actions:
-        score = get_agent_score(last_agent, state.generateSuccessor(last_agent, action), depth)
-        if score > best_score:
-          best_score = score
-      return best_score
-    
-    actions = gameState.getLegalActions(PACMAN_AGENT)
-    best_action = -1
-    best_action_score = float("-inf")
-    for action in actions:
-      current_action_score = get_pacman_best_score(gameState.generateSuccessor(PACMAN_AGENT, action), self.depth)
-      if (current_action_score > best_action_score):
-        best_action = action
-        best_action_score = current_action_score
-    return best_action
+      best_action = -1
+      if agent == PACMAN_AGENT:
+        max_score = float("-inf")
+        for action in state.getLegalActions(agent):
+          score = get_agent_score(agent + 1, state.generateSuccessor(agent, action), depth)[1]
+          if score > max_score:
+            max_score = score
+            best_action = action
+        return (best_action, max_score)
+      else:
+        min_score = float("inf")
+        for action in state.getLegalActions(agent):
+          score = get_agent_score(agent + 1, state.generateSuccessor(agent, action), depth)[1]
+          if score < min_score:
+            min_score = score
+            best_action = action
+        return (best_action, min_score)
+
+    return get_agent_score(PACMAN_AGENT, gameState, self.depth)[0]
 
     # END_YOUR_CODE
 
