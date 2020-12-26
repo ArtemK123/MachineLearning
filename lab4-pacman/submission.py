@@ -256,7 +256,30 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
     """
 
     # BEGIN_YOUR_CODE (our solution is 20 lines of code, but don't worry if you deviate from this)
-    raise Exception("Not implemented yet")
+    def get_agent_score(agent, state, depth):
+      if agent == state.getNumAgents():
+        return get_agent_score(self.pacman_agent, state, depth - 1)
+      if state.isWin() or state.isLose() or depth == 0:
+        return (-1, state.getScore())
+
+      best_action = -1
+      if agent == self.pacman_agent:
+        max_score = float("-inf")
+        for action in state.getLegalActions(agent):
+          score = get_agent_score(agent + 1, state.generateSuccessor(agent, action), depth)[1]
+          if score > max_score:
+            max_score = score
+            best_action = action
+        return (best_action, max_score)
+      else:
+        scores = []
+        actions = state.getLegalActions(agent)
+        for action in actions:
+          scores.append(get_agent_score(agent + 1, state.generateSuccessor(agent, action), depth)[1])
+        random_action_index = random.randrange(len(scores))
+        return (actions[random_action_index], scores[random_action_index])
+
+    return get_agent_score(self.pacman_agent, gameState, self.depth)[0]
     # END_YOUR_CODE
 
 ######################################################################################
