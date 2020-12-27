@@ -291,7 +291,51 @@ def betterEvaluationFunction(currentGameState: GameState) -> float:
   """
 
   # BEGIN_YOUR_CODE (our solution is 13 lines of code, but don't worry if you deviate from this)
-  raise Exception("Not implemented")
+
+  def get_closest_food_distancce(pacman_pos, foods):
+    closest_distance = float("inf")
+    for food in foods:
+      distance = util.manhattanDistance(food, pacman_pos)
+      closest_distance = min(closest_distance, distance)
+    return closest_distance
+
+  def get_closest_ghost(pacman_pos, ghosts):
+    closest_distance = float("inf")
+    closest_ghost = None
+    for ghost in ghosts:
+      distance = util.manhattanDistance(ghost.getPosition(), pacman_pos)
+      if distance < closest_distance:
+        closest_distance = distance
+        closest_ghost = ghost
+    return (closest_ghost, closest_distance)
+
+  WIN_STATE_SCORE = 100000
+  LOSE_STATE_SCORE = -WIN_STATE_SCORE
+  NEAR_GHOST_MAX_SCORE = 50
+  NEAR_FOOD_MAX_SCORE = 10000
+
+  pacman_position = currentGameState.getPacmanPosition()
+  foods = currentGameState.getFood().asList()
+  ghosts = currentGameState.getGhostStates()
+  default_score = currentGameState.getScore()
+
+  if currentGameState.isWin():
+    return WIN_STATE_SCORE
+  if currentGameState.isLose():
+    return LOSE_STATE_SCORE
+
+  if len(ghosts) > 0:
+    (closest_ghost, closest_ghost_distance) = get_closest_ghost(pacman_position, ghosts)
+    if closest_ghost_distance > 0 and closest_ghost_distance < 4:
+      close_ghost_score = NEAR_GHOST_MAX_SCORE / closest_ghost_distance
+      if closest_ghost.scaredTimer > 0:
+        return default_score + close_ghost_score
+      return default_score - close_ghost_score
+
+  closest_food_distance = get_closest_food_distancce(pacman_position, foods)
+  near_food_score = NEAR_FOOD_MAX_SCORE / closest_food_distance
+  return default_score + near_food_score
+
   # END_YOUR_CODE
 
 # Abbreviation
